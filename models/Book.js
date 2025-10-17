@@ -1,25 +1,28 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const BookSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Please provide a title for the book'],
+    required: [true, "Please provide a title for the book"],
     trim: true,
     minlength: 1,
   },
   author: {
     type: String,
-    required: [true, 'Please provide an author for the book'],
+    required: [true, "Please provide an author for the book"],
     trim: true,
   },
-  genre: {
-    type: String,
-    required: [true, 'Please provide a genre for the book'],
-    trim: true,
+  genres: {
+    type: [String],
+    required: [true, "At least one genre is required."],
+    validate: {
+      validator: (arr) => arr.length > 0,
+      message: "At least one genre is required.",
+    },
   },
-  description: {
+  summary: {
     type: String,
-    required: [true, 'Please provide a description for the book'],
+    required: [true, "Please provide a summary for the book"],
     minlength: 10,
   },
   averageRating: {
@@ -30,27 +33,23 @@ const BookSchema = new mongoose.Schema({
   },
   coverImageUrl: {
     type: String,
-    default: '/images/default-book-cover.png', // Default image if none provided
+    default: "/images/default-book-cover.png",
   },
-  publicationYear: {
-    type: Number,
-    required: [true, 'Please provide the publication year'],
-    min: 1000, // Reasonable min year
-    max: new Date().getFullYear(), // Max year is current year
+  publicationDate: {
+    type: Date,
+    required: [true, "Please provide the publication date"],
   },
   isbn: {
     type: String,
     unique: true,
-    sparse: true, // Allows null values to be unique, important if ISBN is optional
+    sparse: true,
     trim: true,
   },
-  // Add more fields as needed, e.g., pages, publisher, etc.
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-const Book = mongoose.models.Book || mongoose.model('Book', BookSchema);
-
+const Book = mongoose.models.Book || mongoose.model("Book", BookSchema);
 export default Book;
