@@ -12,43 +12,99 @@ export async function GET(request) {
     const genre = searchParams.get("genre") || "";
     const author = searchParams.get("author") || "";
     const minRating = searchParams.get("minRating") || "";
+    const startYear = parseInt(searchParams.get("startYear") || "0");
+    const endYear = parseInt(
+      searchParams.get("endYear") || new Date().getFullYear()
+    );
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
     let filter = {};
 
-    // Search conditions
+    // Text search in title, author, summary, genres
     if (query) {
       const regex = new RegExp(query, "i");
       filter.$or = [
         { title: { $regex: regex } },
         { author: { $regex: regex } },
-        { description: { $regex: regex } },
-        { genre: { $regex: regex } },
+        { summary: { $regex: regex } },
+        { genres: { $regex: regex } },
       ];
     }
 
-    if (genre) filter.genre = new RegExp(genre, "i");
-    if (author) filter.author = new RegExp(author, "i");
+    // Genre filter (match any genre in the array)
+    if (genre) {
+      filter.genres = { $in: [new RegExp(genre, "i")] };
+    }
+
+    // Author filter
+    if (author) {
+      filter.author = { $regex: new RegExp(author, "i") };
+    }
+
+    // Minimum rating filter
     if (minRating && !isNaN(parseFloat(minRating))) {
       filter.averageRating = { $gte: parseFloat(minRating) };
     }
 
-    // Pagination
-    const skip = (page - 1) * limit;
-    const totalBooks = await Book.countDocuments(filter);
+    // Log the filter for debugging
+    console.log("Search Params:", Object.fromEntries(searchParams));
+    console.log("Filter:", filter);
+
+    // Aggregation pipeline to handle publicationDate
+    const pipeline = [
+      // Apply text and other filters
+      { $match: filter },
+      // Add a field for the year extracted from publicationDate
+      {
+        $addFields: {
+          year: { $year: "$publicationDate" },
+        },
+      },
+      // Apply year range filter
+      {
+        $match: {
+          year: { $gte: startYear, $lte: endYear },
+        },
+      },
+      // Sort by title
+      { $sort: { title: 1 } },
+      // Pagination
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+      // Remove temporary year field
+      { $project: { year: 0 } },
+    ];
+
+    // Count total documents for pagination
+    const countPipeline = [
+      { $match: filter },
+      {
+        $addFields: {
+          year: { $year: "$publicationDate" },
+        },
+      },
+      {
+        $match: {
+          year: { $gte: startYear, $lte: endYear },
+        },
+      },
+      { $count: "total" },
+    ];
+
+    const [booksResult, countResult] = await Promise.all([
+      Book.aggregate(pipeline).exec(),
+      Book.aggregate(countPipeline).exec(),
+    ]);
+
+    const totalBooks = countResult[0]?.total || 0;
     const totalPages = Math.ceil(totalBooks / limit);
 
-    const books = await Book.find(filter)
-      .sort({ title: 1 })
-      .skip(skip)
-      .limit(limit);
+    console.log("Total Books Count:", totalBooks);
+    console.log("Fetched Books:", booksResult);
 
     return NextResponse.json(
-      {
-        books,
-        totalPages,
-      },
+      { books: booksResult, totalPages, currentPage: page },
       { status: 200 }
     );
   } catch (error) {
