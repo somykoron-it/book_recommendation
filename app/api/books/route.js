@@ -100,9 +100,6 @@ export async function GET(request) {
     const totalBooks = countResult[0]?.total || 0;
     const totalPages = Math.ceil(totalBooks / limit);
 
-    console.log("Total Books Count:", totalBooks);
-    console.log("Fetched Books:", booksResult);
-
     return NextResponse.json(
       { books: booksResult, totalPages, currentPage: page },
       { status: 200 }
