@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -9,16 +9,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") ? true : false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Check if user is logged in on client side
+    const loggedIn = localStorage.getItem("isLoggedIn") ? true : false;
+    setIsLoggedIn(loggedIn);
+  }, []);
 
   const navItems = [
-    { label: "Home", href: "#" },
-    { label: "Explore", href: "#" },
-    { label: "My Library", href: "#" },
-    { label: "Community", href: "#" },
+    { label: "Explore", href: "/explore" },
+    { label: "My Books", href: "/my-books" },
+    { label: "Social", href: "/social" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userEmail");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
+  const isActive = (href) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -26,54 +48,42 @@ const Navbar = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-foreground">BookWise</h1>
+            <Link
+              href="/"
+              className="text-xl font-bold text-foreground hover:opacity-80 transition-opacity"
+            >
+              BookWise
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          {isLoggedIn && (
+            <nav className="hidden md:flex items-center space-x-6">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors px-3 py-2 rounded-lg ${
+                    isActive(item.href)
+                      ? "text-primary bg-primary/10"
+                      : "text-foreground/80 hover:text-foreground hover:bg-accent"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          )}
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
               <>
-                {/* Search Bar - Hidden on mobile */}
-                <div className="hidden sm:block relative w-64">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search books..."
-                      className="w-full pl-9 pr-4 py-2 h-9 rounded-lg border border-input bg-background text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    />
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <svg
-                        className="h-4 w-4 text-muted-foreground"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Notification Bell */}
-                <button className="relative flex items-center justify-center rounded-lg h-9 w-9 hover:bg-accent transition-colors">
+                <Link
+                  href="/notifications"
+                  className="relative flex items-center justify-center rounded-lg h-9 w-9 hover:bg-accent transition-colors"
+                >
                   <svg
                     className="h-5 w-5"
                     fill="none"
@@ -88,7 +98,7 @@ const Navbar = () => {
                     />
                   </svg>
                   <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-                </button>
+                </Link>
 
                 {/* User Avatar with Dropdown */}
                 <DropdownMenu>
@@ -103,15 +113,33 @@ const Navbar = () => {
                       </Avatar>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="cursor-pointer">
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/notifications" className="cursor-pointer">
+                        Notifications
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      Logout
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
             ) : (
-              // Not logged in state - Updated buttons
+              // Not logged in state
               <div className="hidden sm:flex gap-2">
                 <Link
                   href="/login"
@@ -151,42 +179,56 @@ const Navbar = () => {
                 <div className="flex flex-col h-full">
                   {/* Mobile Navigation */}
                   <div className="flex-1 p-6">
-                    <nav className="flex flex-col space-y-6">
+                    <nav className="flex flex-col space-y-4">
                       {navItems.map((item) => (
-                        <a
+                        <Link
                           key={item.label}
                           href={item.href}
-                          className="text-lg font-medium text-foreground py-2 hover:text-primary transition-colors border-b border-border/50"
+                          className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                            isActive(item.href)
+                              ? "text-primary bg-primary/10"
+                              : "text-foreground hover:text-primary hover:bg-accent"
+                          }`}
                         >
                           {item.label}
-                        </a>
+                        </Link>
                       ))}
                     </nav>
 
-                    {/* Mobile Search for logged in users */}
+                    {/* Additional mobile menu items for logged in users */}
                     {isLoggedIn && (
                       <div className="pt-6 mt-6 border-t">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="Search books..."
-                            className="w-full pl-9 pr-4 py-2 h-10 rounded-lg border border-input bg-background text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                          />
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg
-                              className="h-4 w-4 text-muted-foreground"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                              />
-                            </svg>
-                          </div>
+                        <div className="flex flex-col space-y-4">
+                          <Link
+                            href="/notifications"
+                            className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                              isActive("/notifications")
+                                ? "text-primary bg-primary/10"
+                                : "text-foreground hover:text-primary hover:bg-accent"
+                            }`}
+                          >
+                            Notifications
+                          </Link>
+                          <Link
+                            href="/profile"
+                            className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                              isActive("/profile")
+                                ? "text-primary bg-primary/10"
+                                : "text-foreground hover:text-primary hover:bg-accent"
+                            }`}
+                          >
+                            Profile
+                          </Link>
+                          <Link
+                            href="/settings"
+                            className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                              isActive("/settings")
+                                ? "text-primary bg-primary/10"
+                                : "text-foreground hover:text-primary hover:bg-accent"
+                            }`}
+                          >
+                            Settings
+                          </Link>
                         </div>
                       </div>
                     )}
@@ -196,13 +238,31 @@ const Navbar = () => {
                   {!isLoggedIn && (
                     <div className="p-6 border-t bg-muted/20">
                       <div className="flex flex-col gap-3">
-                        <button className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary/10 text-primary dark:bg-primary/20 dark:hover:bg-primary/30 hover:bg-primary/20 text-sm font-bold leading-normal tracking-wide transition-colors">
+                        <Link
+                          href="/login"
+                          className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary/10 text-primary dark:bg-primary/20 dark:hover:bg-primary/30 hover:bg-primary/20 text-sm font-bold leading-normal tracking-wide transition-colors"
+                        >
                           <span className="truncate">Login</span>
-                        </button>
-                        <button className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors">
+                        </Link>
+                        <Link
+                          href="/register"
+                          className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors"
+                        >
                           <span className="truncate">Sign Up</span>
-                        </button>
+                        </Link>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Logout button for mobile */}
+                  {isLoggedIn && (
+                    <div className="p-6 border-t bg-muted/20">
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-red-50 text-red-600 hover:bg-red-100 text-sm font-bold leading-normal tracking-wide transition-colors"
+                      >
+                        <span className="truncate">Logout</span>
+                      </button>
                     </div>
                   )}
                 </div>

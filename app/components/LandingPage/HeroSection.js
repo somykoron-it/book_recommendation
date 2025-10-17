@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const HeroSection = () => {
   return (
     <>
@@ -20,9 +22,12 @@ const HeroSection = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 justify-center">
-              <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors">
+              <Link
+                href={"/login"}
+                className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors"
+              >
                 <span className="truncate">Explore Books</span>
-              </button>
+              </Link>
               <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-colors text-base font-bold leading-normal tracking-wide">
                 <span className="truncate">Learn More</span>
               </button>

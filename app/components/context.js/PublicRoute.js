@@ -11,8 +11,8 @@ const PublicRoute = ({ children }) => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
 
     if (isLoggedIn === "true") {
-      // Redirect logged-in users to /books
-      router.replace("/books");
+      // Redirect logged-in users to /home
+      router.replace("/explore");
     } else {
       setChecking(false); // Allow rendering for public
     }
