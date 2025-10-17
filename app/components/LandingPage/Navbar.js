@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = localStorage.getItem("isLoggedIn") ? true : false;
 
   const navItems = [
     { label: "Home", href: "#" },
