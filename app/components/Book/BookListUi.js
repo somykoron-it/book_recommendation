@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 import NewBookCard from "./NewBookCard";
 import BookFilters from "./BookFilters";
 
 const BookListUi = () => {
   const [books, setBooks] = useState([]);
-  console.log("books on component", books)
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     genres: [],
@@ -15,6 +15,7 @@ const BookListUi = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter(); // Initialize router
 
   // Fetch books from API
   const fetchBooks = async () => {
@@ -47,8 +48,9 @@ const BookListUi = () => {
     fetchBooks();
   }, [searchQuery, filters, currentPage]);
 
+  // Navigate to single book page
   const handleBookClick = (book) => {
-    console.log("Book clicked:", book);
+    router.push(`/explore/${book._id}`);
   };
 
   return (

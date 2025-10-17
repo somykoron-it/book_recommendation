@@ -1,15 +1,19 @@
+import Image from "next/image";
+
 // components/BookCard.jsx
 const NewBookCard = ({ book, onBookClick }) => {
   return (
     <div
       className="flex flex-col gap-2 group cursor-pointer"
-      onClick={() => onBookClick && onBookClick(book._id)}
+      onClick={() => onBookClick && onBookClick(book)}
     >
       <div className="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg overflow-hidden shadow-md border border-slate-200 dark:border-slate-700">
-        <img
+        <Image
+          width={4}
+          height={5}
           alt={`Book cover: ${book.title}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          src={book.image}
+          src={book.coverImageUrl}
         />
       </div>
       <div>
