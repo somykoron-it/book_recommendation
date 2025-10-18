@@ -1,4 +1,4 @@
-import UsersBooks from "../components/UserBooks/UsersBooks";
+import UsersBooks from "../../components/UserBooks/UsersBooks";
 
 const page = () => {
   return (

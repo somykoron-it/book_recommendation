@@ -1,7 +1,7 @@
 "use client";
 
-import PublicRoute from "../components/context.js/PublicRoute";
-import Navbar from "../components/LandingPage/Navbar";
+import PublicRoute from "../../components/context.js/PublicRoute";
+import Navbar from "../../components/LandingPage/Navbar";
 import Link from "next/link";
 import {
   HiOutlineStar,

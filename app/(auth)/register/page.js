@@ -1,5 +1,5 @@
-import RegisterForm from "@/app/components/Auth/RegisterForm";
-import PublicRoute from "@/app/components/context.js/PublicRoute";
+import RegisterForm from "@/components/Auth/RegisterForm";
+import PublicRoute from "@/components/context.js/PublicRoute";
 
 // This is a Server Component by default, as it doesn't have 'use client'
 // It renders the client component RegisterForm.
