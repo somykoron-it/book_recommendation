@@ -9,12 +9,34 @@ import { MdOutlineBookmarkAdd, MdBookmark } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import StarRating from "@/app/components/Book/StarRating";
 
+// Shadcn Dialog Components
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
 const BookDetails = ({ book }) => {
   const router = useRouter();
   const [isInReadingList, setIsInReadingList] = useState(false);
   const [readingListAnimating, setReadingListAnimating] = useState(false);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Review Dialog States
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Get user ID from localStorage on component mount
   useEffect(() => {
@@ -57,7 +79,6 @@ const BookDetails = ({ book }) => {
     setReadingListAnimating(true);
 
     try {
-      // Add to reading list
       const res = await fetch("/api/readinglists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,7 +90,7 @@ const BookDetails = ({ book }) => {
       });
 
       if (!res.ok) throw new Error("Failed to add to reading list");
-    
+
       setIsInReadingList(true);
     } catch (error) {
       console.error("Reading list update failed:", error);
@@ -78,6 +99,92 @@ const BookDetails = ({ book }) => {
     setTimeout(() => setReadingListAnimating(false), 600);
   };
 
+  // Review Dialog Handlers
+  const handleOpenReviewDialog = () => {
+    if (!userId) {
+      alert("Please log in to write a review");
+      return;
+    }
+    setIsReviewDialogOpen(true);
+    setSubmitError("");
+    setSubmitSuccess(false);
+    setReviewRating(0);
+    setReviewText("");
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating) {
+      setSubmitError("Please select a rating");
+      return;
+    }
+
+    if (reviewText.length < 10) {
+      setSubmitError("Review must be at least 10 characters long");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      console.log("Submitting review for book:", book._id);
+      console.log("User ID:", userId);
+
+      const res = await fetch(`/api/books/${book._id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          rating: reviewRating,
+          reviewText: reviewText.trim(),
+        }),
+      });
+
+      console.log("Response status:", res.status);
+
+      // Get the response text first to see what we're getting
+      const responseText = await res.text();
+      console.log("Raw response:", responseText.substring(0, 200));
+
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        throw new Error(`Server returned invalid JSON. Status: ${res.status}`);
+      }
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || `Request failed with status ${res.status}`
+        );
+      }
+
+      setSubmitSuccess(true);
+      setReviewRating(0);
+      setReviewText("");
+
+      setTimeout(() => {
+        setIsReviewDialogOpen(false);
+        setSubmitSuccess(false);
+        // Refresh to show the new review
+        router.refresh();
+      }, 2000);
+    } catch (error) {
+      console.error("Review submission error:", error);
+      setSubmitError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleStarClick = (rating) => {
+    setReviewRating(rating);
+    setSubmitError("");
+  };
 
   if (loading) {
     return (
@@ -122,7 +229,7 @@ const BookDetails = ({ book }) => {
       </div>
 
       {/* Right Column - Book Information */}
-      <div className="md:col-span-2 relative">        
+      <div className="md:col-span-2 relative">
         {/* Reading List Button */}
         <button
           onClick={handleReadingListToggle}
@@ -227,13 +334,115 @@ const BookDetails = ({ book }) => {
                 ? "Added to Reading List"
                 : "Add to Reading List"}
             </Button>
-            <Button
-              variant="outline"
-              className="flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all border-zinc-300 dark:border-zinc-600 flex items-center gap-2 group"
+
+            {/* Review Dialog Trigger */}
+            <Dialog
+              open={isReviewDialogOpen}
+              onOpenChange={setIsReviewDialogOpen}
             >
-              <FiEdit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Write a Review
-            </Button>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={handleOpenReviewDialog}
+                  className="flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all border-zinc-300 dark:border-zinc-600 flex items-center gap-2 group"
+                >
+                  <FiEdit className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Write a Review
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Write a Review</DialogTitle>
+                  <DialogDescription>
+                    Share your thoughts about "{book.title}" by {book.author}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-6 py-4">
+                  {/* Rating Selection */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="rating">Your Rating *</Label>
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => handleStarClick(star)}
+                          className={`p-1 transition-transform hover:scale-110 ${
+                            star <= reviewRating
+                              ? "text-yellow-500"
+                              : "text-zinc-300 dark:text-zinc-600"
+                          }`}
+                        >
+                          <svg
+                            className="w-8 h-8"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        </button>
+                      ))}
+                      <span className="ml-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        {reviewRating > 0
+                          ? `${reviewRating} out of 5`
+                          : "Select rating"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Review Text */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="review">Your Review *</Label>
+                    <Textarea
+                      id="review"
+                      placeholder="Share your thoughts about this book... (minimum 10 characters)"
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      className="min-h-[120px] resize-none"
+                      disabled={isSubmitting}
+                    />
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {reviewText.length}/10 characters minimum
+                    </p>
+                  </div>
+
+                  {/* Error/Success Messages */}
+                  {submitError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{submitError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {submitSuccess && (
+                    <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                      <AlertDescription className="text-green-800 dark:text-green-200">
+                        Review submitted successfully! Thank you for your
+                        feedback.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsReviewDialogOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSubmitReview}
+                    disabled={
+                      isSubmitting || !reviewRating || reviewText.length < 10
+                    }
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {!userId && (
