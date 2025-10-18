@@ -53,7 +53,9 @@ const BookDetails = ({ book }) => {
   // Check if book is in user's reading lists
   const checkReadingListStatus = async (userId) => {
     try {
-      const res = await fetch(`/api/readinglists?userId=${userId}`);
+      const res = await fetch(`/api/readinglists?userId=${userId}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch reading lists");
 
       const data = await res.json();
@@ -81,6 +83,7 @@ const BookDetails = ({ book }) => {
 
     try {
       const res = await fetch("/api/readinglists", {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -133,6 +136,7 @@ const BookDetails = ({ book }) => {
       console.log("User ID:", userId);
 
       const res = await fetch(`/api/books/${book._id}/reviews`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",

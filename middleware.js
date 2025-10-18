@@ -1,27 +1,18 @@
-// middleware.js
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export function middleware(req) {
+export async function middleware(req) {
   const token = req.cookies.get("token")?.value;
-
-  // If there is no token, block access
-  if (!token) {
+  if (!token)
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    // Optionally attach decoded user data to the request
-    req.user = decoded;
-
-    // Continue request
+    const { payload } = await jwtVerify(token, secret);
     return NextResponse.next();
   } catch (error) {
+    console.error("Token verification failed:", error.message);
     return NextResponse.json(
       { message: "Invalid or expired token" },
       { status: 401 }
@@ -29,7 +20,12 @@ export function middleware(req) {
   }
 }
 
-// ✅ Protect all routes under /api/protected/*
+// Protect all routes under /api/protected/*
 export const config = {
-  matcher: ["/api/protected/:path*"],
+  matcher: [
+    "/api/protected/:path*",
+    "/api/readinglists/:path*",
+    "/api/books/:path*",
+    "/api/reviews/:path*",
+  ],
 };

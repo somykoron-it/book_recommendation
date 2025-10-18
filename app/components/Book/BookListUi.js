@@ -37,7 +37,9 @@ const BookListUi = () => {
       params.set("page", currentPage);
       params.set("limit", 12);
 
-      const res = await fetch(`/api/books?${params.toString()}`);
+      const res = await fetch(`/api/books?${params.toString()}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch books");
       const data = await res.json();
       setBooks(data.books || []);
