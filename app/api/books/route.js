@@ -32,6 +32,13 @@ export async function GET(request) {
       ];
     }
 
+    // Genre filter (FIXED: Handle multiple genres with OR condition)
+    // if (genre) {
+    //   const genreArray = genre.split(",");
+    //   // Use $in operator to match books that have ANY of the selected genres
+    //   filter.genres = { $in: genreArray.map((g) => new RegExp(g.trim(), "i")) };
+    // }
+
     // Genre filter (match any genre in the array)
     if (genre) {
       filter.genres = { $in: [new RegExp(genre, "i")] };
