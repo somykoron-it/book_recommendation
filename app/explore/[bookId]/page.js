@@ -21,13 +21,17 @@ const BookDetailPage = () => {
       setLoading(true);
       try {
         // Fetch single book
-        const bookRes = await fetch(`/api/books/${bookId}`);
+        const bookRes = await fetch(`/api/books/${bookId}`, {
+          credentials: "include",
+        });
         if (!bookRes.ok) throw new Error("Failed to fetch book");
         const bookData = await bookRes.json();
         setBook(bookData.book);
 
         // Fetch similar books
-        const similarRes = await fetch(`/api/books/similar/${bookId}`);
+        const similarRes = await fetch(`/api/books/similar/${bookId}`, {
+          credentials: "include",
+        });
         if (!similarRes.ok) throw new Error("Failed to fetch similar books");
         const similarData = await similarRes.json();
         setSimilarBooks(similarData.similarBooks || []);

@@ -31,7 +31,9 @@ const UsersBooks = () => {
 
     const fetchReadingList = async () => {
       try {
-        const res = await fetch(`/api/readinglists?userId=${userId}`);
+        const res = await fetch(`/api/readinglists?userId=${userId}`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch reading list");
         const data = await res.json();
         setReadingList(data.readingList);
@@ -51,6 +53,7 @@ const UsersBooks = () => {
 
       if (!readingList?._id) {
         const createRes = await fetch("/api/readinglists", {
+          credentials: "include",
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -70,6 +73,7 @@ const UsersBooks = () => {
       }
 
       const res = await fetch(`/api/readinglists/${readingList._id}`, {
+        credentials: "include",
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -103,6 +107,7 @@ const UsersBooks = () => {
       }
 
       const res = await fetch(`/api/readinglists/${readingList._id}`, {
+        credentials: "include",
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
