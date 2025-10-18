@@ -1,5 +1,5 @@
-import PublicRoute from "./components/context.js/PublicRoute";
-import HeroSection from "./components/LandingPage/HeroSection";
+import PublicRoute from "../components/context.js/PublicRoute";
+import HeroSection from "../components/LandingPage/HeroSection";
 
 export default function LandingPage() {
   return (

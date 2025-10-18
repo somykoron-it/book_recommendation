@@ -1,11 +1,10 @@
 import "./globals.css";
 import { Merriweather, Open_Sans } from "next/font/google";
 
-
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
-import Navbar from "./components/LandingPage/Navbar";
-import { LoaderProvider } from "./components/context.js/LoaderContext";
+import Navbar from "../components/LandingPage/Navbar";
+import { LoaderProvider } from "../components/context.js/LoaderContext";
 
 const merriweather = Merriweather({
   variable: "--font-merriweather",
