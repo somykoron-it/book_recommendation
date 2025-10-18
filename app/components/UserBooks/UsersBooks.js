@@ -10,6 +10,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import BookItem from "./BookItem";
+import { toast } from "react-toastify";
 
 const UsersBooks = () => {
   const [readingList, setReadingList] = useState(null);
@@ -83,6 +85,7 @@ const UsersBooks = () => {
       if (res.ok) {
         const updatedRes = await fetch(`/api/readinglists?userId=${userId}`);
         const data = await updatedRes.json();
+        toast.success("Updated successfully!");
         setReadingList(data.readingList);
       }
     } catch (error) {
@@ -114,8 +117,9 @@ const UsersBooks = () => {
       if (res.ok) {
         const updatedRes = await fetch(`/api/readinglists?userId=${userId}`);
         const data = await updatedRes.json();
+        toast.success("Book removed successfully!");
         setReadingList(data.readingList);
-        setCurrentPage(1); // Reset to first page after removal
+        setCurrentPage(1);
       }
     } catch (error) {
       console.error("Error removing book:", error);
@@ -162,7 +166,9 @@ const UsersBooks = () => {
 
   if (loading) {
     return (
-      <p className="text-center py-10 text-gray-500">Loading your books...</p>
+      <div className="flex justify-center items-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
@@ -171,149 +177,137 @@ const UsersBooks = () => {
 
   if (!hasBooks) {
     return (
-      <p className="text-center py-10 text-gray-500">
-        No books in your reading list yet.
-      </p>
+      <div className="text-center py-16">
+        <div className="text-gray-400 dark:text-gray-500 mb-4">
+          <svg
+            className="w-16 h-16 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
+          No books in your reading list yet
+        </p>
+        <p className="text-gray-400 dark:text-gray-500 text-sm">
+          Start adding books to see them here
+        </p>
+      </div>
     );
   }
 
-  // Book item component with improved UI
-  const BookItem = ({ bookItem }) => (
-    <div className="bg-background-light dark:bg-subtle-dark/40 p-4 rounded-lg flex items-center justify-between transition-shadow hover:shadow-md">
-      <div className="flex items-center gap-4 overflow-hidden flex-1 min-w-0">
-        <img
-          src={bookItem.bookId?.coverImageUrl || "/book-placeholder.jpg"}
-          alt={bookItem.bookId?.title}
-          className="w-14 h-20 object-cover rounded flex-shrink-0"
-        />
-        <div className="overflow-hidden flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground-light dark:text-foreground-dark truncate text-lg">
-            {bookItem.bookId?.title}
-          </h3>
-          <p className="text-sm text-muted-light dark:text-muted-dark truncate mb-1">
-            {bookItem.bookId?.author}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {activeTab !== "finished-reading" && (
-          <button
-            onClick={() => {
-              const statuses = [
-                "Want to Read",
-                "Currently Reading",
-                "Finished Reading",
-              ];
-              const currentIndex = statuses.indexOf(bookItem.status);
-              const nextStatus = statuses[(currentIndex + 1) % statuses.length];
-              handleStatusChange(bookItem.bookId?._id, nextStatus);
-            }}
-            className="p-2 rounded-full text-muted-light dark:text-muted-dark hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-primary transition-colors cursor-pointer"
-            title="Change status"
-          >
-            <svg
-              fill="currentColor"
-              height="20"
-              viewBox="0 0 256 256"
-              width="20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V48a8,8,0,0,1,16,0v72h80A8,8,0,0,1,224,128Z"></path>
-            </svg>
-          </button>
-        )}
-        <button
-          onClick={() => handleRemoveBook(bookItem.bookId?._id)}
-          className="p-2 rounded-full text-muted-light dark:text-muted-dark hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
-          title="Remove from list"
-        >
-          <svg
-            fill="currentColor"
-            height="20"
-            viewBox="0 0 256 256"
-            width="20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground-light dark:text-foreground-dark mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground-light dark:text-foreground-dark mb-6">
           My Books
         </h1>
 
-        {/* Custom Tabs Navigation */}
-        <div className="border-b border-subtle-light dark:border-subtle-dark/20 mb-6">
-          <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+        {/* Custom Tabs Navigation - Improved for mobile */}
+        <div className="border-b border-subtle-light dark:border-subtle-dark/20 mb-6 overflow-x-auto">
+          <nav aria-label="Tabs" className="flex min-w-max">
             <button
               onClick={() => {
                 setActiveTab("want-to-read");
                 setCurrentPage(1);
               }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`cursor-pointer whitespace-nowrap py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === "want-to-read"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-light dark:text-muted-dark hover:text-foreground-light dark:hover:text-foreground-dark hover:border-subtle-light dark:hover:border-subtle-dark"
               }`}
             >
-              Want to Read ({wantToReadBooks.length})
+              Want to Read
+              <span className="ml-2 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
+                {wantToReadBooks.length}
+              </span>
             </button>
             <button
               onClick={() => {
                 setActiveTab("currently-reading");
                 setCurrentPage(1);
               }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`cursor-pointer whitespace-nowrap py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === "currently-reading"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-light dark:text-muted-dark hover:text-foreground-light dark:hover:text-foreground-dark hover:border-subtle-light dark:hover:border-subtle-dark"
               }`}
             >
-              Currently Reading ({currentlyReadingBooks.length})
+              Currently Reading
+              <span className="ml-2 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
+                {currentlyReadingBooks.length}
+              </span>
             </button>
             <button
               onClick={() => {
                 setActiveTab("finished-reading");
                 setCurrentPage(1);
               }}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`cursor-pointer whitespace-nowrap py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === "finished-reading"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-light dark:text-muted-dark hover:text-foreground-light dark:hover:text-foreground-dark hover:border-subtle-light dark:hover:border-subtle-dark"
               }`}
             >
-              Finished Reading ({finishedReadingBooks.length})
+              Finished Reading
+              <span className="ml-2 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
+                {finishedReadingBooks.length}
+              </span>
             </button>
           </nav>
         </div>
 
         {/* Tab Content */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {currentBooksPage.length === 0 ? (
-            <p className="text-center py-10 text-gray-500">
-              {activeTab === "want-to-read" &&
-                'No books in your "Want to Read" list yet.'}
-              {activeTab === "currently-reading" &&
-                'No books in your "Currently Reading" list yet.'}
-              {activeTab === "finished-reading" &&
-                'No books in your "Finished Reading" list yet.'}
-            </p>
+            <div className="text-center py-12">
+              <div className="text-gray-400 dark:text-gray-500 mb-3">
+                <svg
+                  className="w-12 h-12 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-500 dark:text-gray-400">
+                {activeTab === "want-to-read" &&
+                  'No books in your "Want to Read" list yet.'}
+                {activeTab === "currently-reading" &&
+                  'No books in your "Currently Reading" list yet.'}
+                {activeTab === "finished-reading" &&
+                  'No books in your "Finished Reading" list yet.'}
+              </p>
+            </div>
           ) : (
             currentBooksPage.map((bookItem) => (
-              <BookItem key={bookItem._id} bookItem={bookItem} />
+              <BookItem
+                key={bookItem._id}
+                bookItem={bookItem}
+                activeTab={activeTab}
+                onStatusChange={handleStatusChange}
+                onRemoveBook={handleRemoveBook}
+              />
             ))
           )}
         </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 sm:mt-8 flex justify-center">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
