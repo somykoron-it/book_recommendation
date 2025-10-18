@@ -1,3 +1,4 @@
+// models/User.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -28,6 +29,18 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "/images/default-avatar.png",
   },
+  followers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  following: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -46,6 +59,19 @@ UserSchema.pre("save", async function (next) {
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Virtual for follower count
+UserSchema.virtual("followerCount").get(function () {
+  return this.followers.length;
+});
+
+// Virtual for following count
+UserSchema.virtual("followingCount").get(function () {
+  return this.following.length;
+});
+
+// Ensure virtual fields are serialized
+UserSchema.set("toJSON", { virtuals: true });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 export default User;
