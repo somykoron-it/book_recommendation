@@ -68,7 +68,7 @@ export default function LoginForm() {
         localStorage.setItem("UserId", result.user._id);
         localStorage.setItem("user", result.user.username);
         localStorage.setItem("userEmail", result.user.email);
-        router.push("/explore");
+        // router.push("/explore");
       } else {
         setError(
           result.message || "Login failed. Please check your credentials."

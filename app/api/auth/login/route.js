@@ -1,6 +1,10 @@
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
-import { NextResponse } from 'next/server';
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/User";
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // Use env var in production
+const JWT_EXPIRES_IN = "7d"; // 7 days
 
 export async function POST(request) {
   await dbConnect();
@@ -8,52 +12,52 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
-    // Basic validation
     if (!email || !password) {
       return NextResponse.json(
-        { message: 'Please enter all fields' },
+        { message: "Please enter all fields" },
         { status: 400 }
       );
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
-
-    if (!user) {
+    if (!user || !(await user.matchPassword(password))) {
       return NextResponse.json(
-        { message: 'Invalid credentials' }, // Use generic message for security
-        { status: 401 } // 401 Unauthorized
+        { message: "Invalid credentials" },
+        { status: 401 }
       );
     }
 
-    // Compare provided password with hashed password in DB
-    const isMatch = await user.matchPassword(password);
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
+    });
 
-    if (!isMatch) {
-      return NextResponse.json(
-        { message: 'Invalid credentials' }, // Use generic message for security
-        { status: 401 } // 401 Unauthorized
-      );
-    }
-
-    // If login is successful:
-    // In a real application, you would generate a JWT here and set it as a cookie
-    // or return it to the client. For now, we'll just return a success message
-    // and basic user info (without password).
-    const userWithoutPassword = {
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-    };
-
-    return NextResponse.json(
-      { message: 'Logged in successfully', user: userWithoutPassword },
+    // Create secure cookie
+    const response = NextResponse.json(
+      {
+        message: "Logged in successfully",
+        user: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+        },
+      },
       { status: 200 }
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return NextResponse.json(
-      { message: 'Something went wrong during login', error: error.message },
+      { message: "Something went wrong during login", error: error.message },
       { status: 500 }
     );
   }
