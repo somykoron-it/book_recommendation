@@ -1,7 +1,7 @@
+// app/api/readinglists/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import ReadingList from "@/models/ReadingList";
-import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request) {
   await dbConnect();
@@ -9,7 +9,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
-    const listType = searchParams.get("listType");
+    const status = searchParams.get("status");
 
     if (!userId) {
       return NextResponse.json(
@@ -18,20 +18,38 @@ export async function GET(request) {
       );
     }
 
-    let query = { userId };
-    if (listType) {
-      query.listType = listType;
+    let readingList = await ReadingList.findOne({ userId }).populate(
+      "books.bookId"
+    );
+
+    if (!readingList) {
+      // Return empty structure if no reading list exists
+      return NextResponse.json({
+        readingList: {
+          userId,
+          books: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
     }
 
-    const readingLists = await ReadingList.find(query)
-      .populate("books")
-      .sort({ updatedAt: -1 });
+    // Filter by status if provided
+    if (status) {
+      const filteredBooks = readingList.books.filter(
+        (book) => book.status === status
+      );
+      readingList = {
+        ...readingList.toObject(),
+        books: filteredBooks,
+      };
+    }
 
-    return NextResponse.json({ readingLists });
+    return NextResponse.json({ readingList });
   } catch (error) {
-    console.error("Error fetching reading lists:", error);
+    console.error("Error fetching reading list:", error);
     return NextResponse.json(
-      { error: "Failed to fetch reading lists" },
+      { error: "Failed to fetch reading list" },
       { status: 500 }
     );
   }
@@ -41,44 +59,64 @@ export async function POST(request) {
   await dbConnect();
 
   try {
-    const { userId, listType, bookId } = await request.json();
+    const { userId, bookId, status = "Want to Read" } = await request.json();
 
-    if (!userId || !listType || !bookId) {
+    if (!userId || !bookId) {
       return NextResponse.json(
-        { error: "User ID, list type, and book ID are required" },
+        { error: "User ID and book ID are required" },
         { status: 400 }
       );
     }
 
-    // Validate list type
-    const validListTypes = [
+    // Validate status
+    const validStatuses = [
       "Want to Read",
       "Currently Reading",
       "Finished Reading",
     ];
-    if (!validListTypes.includes(listType)) {
-      return NextResponse.json({ error: "Invalid list type" }, { status: 400 });
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
-    // Check if the list already exists for this user
-    let readingList = await ReadingList.findOne({ userId, listType });
+    // Find or create reading list for user
+    let readingList = await ReadingList.findOne({ userId });
 
     if (readingList) {
-      // Add book to existing list if not already present
-      if (!readingList.books.includes(bookId)) {
-        readingList.books.push(bookId);
-        await readingList.save();
+      // Check if book already exists in reading list
+      const existingBookIndex = readingList.books.findIndex(
+        (book) => book.bookId.toString() === bookId
+      );
+
+      if (existingBookIndex !== -1) {
+        // Update existing book status
+        readingList.books[existingBookIndex].status = status;
+        readingList.books[existingBookIndex].updatedAt = new Date();
+      } else {
+        // Add new book to reading list
+        readingList.books.push({
+          bookId,
+          status,
+          addedAt: new Date(),
+          updatedAt: new Date(),
+        });
       }
     } else {
       // Create new reading list
-      readingList = await ReadingList.create({
+      readingList = new ReadingList({
         userId,
-        listType,
-        books: [bookId],
+        books: [
+          {
+            bookId,
+            status,
+            addedAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       });
     }
 
-    await readingList.populate("books");
+    await readingList.save();
+    await readingList.populate("books.bookId");
 
     return NextResponse.json(
       { message: "Book added to reading list", readingList },
