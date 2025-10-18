@@ -22,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "react-toastify";
 
 const BookDetails = ({ book }) => {
   const router = useRouter();
@@ -90,6 +91,7 @@ const BookDetails = ({ book }) => {
       });
 
       if (!res.ok) throw new Error("Failed to add to reading list");
+      toast.success("Book added to reading list!");
 
       setIsInReadingList(true);
     } catch (error) {
@@ -323,7 +325,7 @@ const BookDetails = ({ book }) => {
             <Button
               onClick={handleReadingListToggle}
               disabled={!userId || isInReadingList}
-              className={`flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg font-semibold text-sm shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 group ${
+              className={`flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg font-semibold text-sm shadow-lg transition-all transform flex items-center gap-2 group ${
                 isInReadingList
                   ? "bg-green-600 hover:bg-green-600 text-white"
                   : "bg-primary text-white hover:bg-primary/90"
@@ -342,11 +344,10 @@ const BookDetails = ({ book }) => {
             >
               <DialogTrigger asChild>
                 <Button
-                  variant="outline"
                   onClick={handleOpenReviewDialog}
-                  className="flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all border-zinc-300 dark:border-zinc-600 flex items-center gap-2 group"
+                  className="flex-1 sm:flex-none justify-center px-6 py-3 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold text-sm hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2"
                 >
-                  <FiEdit className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <FiEdit className="w-4 h-4" />
                   Write a Review
                 </Button>
               </DialogTrigger>
@@ -370,7 +371,7 @@ const BookDetails = ({ book }) => {
                           onClick={() => handleStarClick(star)}
                           className={`p-1 transition-transform hover:scale-110 ${
                             star <= reviewRating
-                              ? "text-yellow-500"
+                              ? "text-primary"
                               : "text-zinc-300 dark:text-zinc-600"
                           }`}
                         >

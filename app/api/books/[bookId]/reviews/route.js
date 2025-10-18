@@ -11,13 +11,11 @@ export async function POST(request, { params }) {
     // Get the bookId from params
     const { bookId } = params;
 
-    console.log("Received bookId:", bookId);
 
     // Parse request body
     const body = await request.json();
     const { userId, rating, reviewText } = body;
 
-    console.log("Received data:", { userId, rating, reviewText });
 
     // Validate required fields
     if (!userId) {

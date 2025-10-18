@@ -1,5 +1,11 @@
+import UsersBooks from "../components/UserBooks/UsersBooks";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <>
+      <UsersBooks />
+    </>
+  );
 };
 
 export default page;
