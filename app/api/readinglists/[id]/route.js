@@ -1,3 +1,4 @@
+// app/api/readinglists/[id]/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import ReadingList from "@/models/ReadingList";
@@ -18,7 +19,7 @@ export async function GET(request, { params }) {
     }
 
     const readingList = await ReadingList.findOne({ _id: id, userId }).populate(
-      "books"
+      "books.bookId"
     );
 
     if (!readingList) {
@@ -43,7 +44,7 @@ export async function PUT(request, { params }) {
 
   try {
     const { id } = params;
-    const { userId, action, bookId, listType } = await request.json();
+    const { userId, bookId, status, action } = await request.json();
 
     if (!userId) {
       return NextResponse.json(
@@ -61,20 +62,44 @@ export async function PUT(request, { params }) {
       );
     }
 
-    if (action === "addBook" && bookId) {
-      if (!readingList.books.includes(bookId)) {
-        readingList.books.push(bookId);
+    // Update book status
+    if (action === "updateStatus" && bookId && status) {
+      const validStatuses = [
+        "Want to Read",
+        "Currently Reading",
+        "Finished Reading",
+      ];
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
       }
-    } else if (action === "removeBook" && bookId) {
-      readingList.books = readingList.books.filter(
-        (book) => book.toString() !== bookId
+
+      const bookIndex = readingList.books.findIndex(
+        (book) => book.bookId.toString() === bookId
       );
-    } else if (action === "updateType" && listType) {
-      readingList.listType = listType;
+
+      if (bookIndex === -1) {
+        return NextResponse.json(
+          { error: "Book not found in reading list" },
+          { status: 404 }
+        );
+      }
+
+      readingList.books[bookIndex].status = status;
+      readingList.books[bookIndex].updatedAt = new Date();
+    } else if (action === "removeBook" && bookId) {
+      // Remove book from reading list
+      readingList.books = readingList.books.filter(
+        (book) => book.bookId.toString() !== bookId
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Invalid action or missing parameters" },
+        { status: 400 }
+      );
     }
 
     await readingList.save();
-    await readingList.populate("books");
+    await readingList.populate("books.bookId");
 
     return NextResponse.json({
       message: "Reading list updated successfully",
