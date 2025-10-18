@@ -60,13 +60,13 @@ const BookFilters = ({ filters, onFiltersChange }) => {
   })();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Genre Filter */}
       <div>
-        <h3 className="font-semibold text-slate-900 dark:text-white mb-3">
+        <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
           Genre
         </h3>
-        <div className="space-y-2 max-h-80 overflow-y-auto">
+        <div className="space-y-3 max-h-80 overflow-y-auto">
           {allGenres.map((genre) => (
             <label
               key={genre}
@@ -78,7 +78,7 @@ const BookFilters = ({ filters, onFiltersChange }) => {
                 onChange={() => handleGenreToggle(genre)}
                 className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="text-sm text-slate-900 dark:text-white">
                 {genre}
               </span>
             </label>
@@ -88,43 +88,45 @@ const BookFilters = ({ filters, onFiltersChange }) => {
 
       {/* Publication Year Slider */}
       <div>
-        <h3 className="font-semibold text-slate-900 dark:text-white mb-3">
+        <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
           Publication Year
         </h3>
-        <div className="relative h-2 rounded-full bg-slate-200 dark:bg-slate-800 mb-8">
-          <div
-            className="absolute h-2 rounded-full bg-blue-500"
-            style={sliderStyle}
-          ></div>
-          <input
-            type="range"
-            min={1900}
-            max={new Date().getFullYear()}
-            value={localFilters.publicationYear[0]}
-            onChange={(e) => handleYearChange(0, e.target.value)}
-            className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
-          />
-          <input
-            type="range"
-            min={1900}
-            max={new Date().getFullYear()}
-            value={localFilters.publicationYear[1]}
-            onChange={(e) => handleYearChange(1, e.target.value)}
-            className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
-          />
-        </div>
-        <div className="flex justify-between text-sm text-slate-700 dark:text-slate-300">
-          <span>{localFilters.publicationYear[0]}</span>
-          <span>{localFilters.publicationYear[1]}</span>
+        <div className="px-2">
+          <div className="relative h-2 rounded-full bg-slate-200 dark:bg-slate-800 mb-6">
+            <div
+              className="absolute h-2 rounded-full bg-blue-500"
+              style={sliderStyle}
+            ></div>
+            <input
+              type="range"
+              min={1900}
+              max={new Date().getFullYear()}
+              value={localFilters.publicationYear[0]}
+              onChange={(e) => handleYearChange(0, e.target.value)}
+              className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
+            />
+            <input
+              type="range"
+              min={1900}
+              max={new Date().getFullYear()}
+              value={localFilters.publicationYear[1]}
+              onChange={(e) => handleYearChange(1, e.target.value)}
+              className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
+            />
+          </div>
+          <div className="flex justify-between text-sm text-slate-900 dark:text-white mt-2">
+            <span>{localFilters.publicationYear[0]}</span>
+            <span>{localFilters.publicationYear[1]}</span>
+          </div>
         </div>
       </div>
 
       {/* Minimum Rating */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+        <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
           Minimum Rating
         </h4>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {[0, 1, 2, 3, 4, 5].map((rating) => (
             <label key={rating} className="cursor-pointer">
               <input
@@ -134,7 +136,7 @@ const BookFilters = ({ filters, onFiltersChange }) => {
                 checked={localFilters.minRating === rating}
                 onChange={() => handleRatingChange(rating)}
               />
-              <div className="rounded px-3 py-1 text-sm border border-slate-300 dark:border-slate-700 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500 transition-colors">
+              <div className="rounded px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500 transition-colors">
                 {rating === 0
                   ? "Any"
                   : rating === 5
