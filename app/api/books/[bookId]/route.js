@@ -21,7 +21,6 @@ export async function GET(request, { params }) {
       return NextResponse.json({ message: "Book not found" }, { status: 404 });
     }
 
-    console.log("Fetched Book:", book);
 
     return NextResponse.json({ book }, { status: 200 });
   } catch (error) {

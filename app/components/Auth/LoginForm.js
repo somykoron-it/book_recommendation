@@ -61,9 +61,11 @@ export default function LoginForm() {
       });
 
       const result = await response.json();
+      console.log("User", result)
       if (response.ok) {
         toast.success("Login successful!");
         localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("UserId", result.user._id);
         localStorage.setItem("user", result.user.username);
         localStorage.setItem("userEmail", result.user.email);
         router.push("/explore");
