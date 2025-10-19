@@ -1,5 +1,12 @@
+
+import SocialPageCombine from "@/components/Social/SocialPageCombine";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <>
+      <SocialPageCombine />
+    </>
+  );
 };
 
 export default page;
