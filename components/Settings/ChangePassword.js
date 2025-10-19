@@ -149,7 +149,7 @@ const ChangePassword = () => {
             disabled={
               isLoading || !currentPassword || !newPassword || !confirmPassword
             }
-            className="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Changing Password..." : "Change Password"}
           </Button>

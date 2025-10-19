@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MdOutlineBookmarkAdd, MdBookmark } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
-import StarRating from "@/app/components/Book/StarRating";
+
 
 // Shadcn Dialog Components
 import {
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "react-toastify";
+import StarRating from "./StarRating";
 
 const BookDetails = ({ book }) => {
   const router = useRouter();
