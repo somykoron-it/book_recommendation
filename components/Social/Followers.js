@@ -129,6 +129,7 @@ const Followers = () => {
         {followerUsers.length > 0 ? (
           followerUsers.map((user) => (
             <UserCard
+              isFollowers={true}
               key={user.id}
               user={user}
               onFollowToggle={handleFollowToggle}

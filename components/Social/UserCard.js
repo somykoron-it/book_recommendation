@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 
-const UserCard = ({ user, onFollowToggle }) => {
+const UserCard = ({ user, onFollowToggle, isFollowers = false }) => {
   const router = useRouter();
 
   // Safe destructuring with default values
   const {
     id = "",
     username = "Unknown User",
-    avatar = "/images/default-avatar.png",
+    avatar = "",
     followerCount = 0,
     isFollowing = false,
   } = user || {};
@@ -55,16 +55,20 @@ const UserCard = ({ user, onFollowToggle }) => {
           </p>
         </div>
       </div>
-      <button
-        onClick={handleButtonClick}
-        className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-          isFollowing
-            ? "bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-            : "bg-primary text-white hover:bg-primary/90"
-        }`}
-      >
-        {isFollowing ? "Unfollow" : "Follow"}
-      </button>
+      {isFollowers ? (
+        <></>
+      ) : (
+        <button
+          onClick={handleButtonClick}
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            isFollowing
+              ? "bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+              : "bg-primary text-white hover:bg-primary/90"
+          }`}
+        >
+          {isFollowing ? "Unfollow" : "Follow"}
+        </button>
+      )}
     </div>
   );
 };

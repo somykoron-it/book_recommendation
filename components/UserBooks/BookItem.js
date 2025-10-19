@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-
-const BookItem = ({
-  bookItem,
-  activeTab,
-  onStatusChange,
-  onRemoveBook,
-}) => {
+const BookItem = ({ bookItem, activeTab, onStatusChange, onRemoveBook }) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusChange = async () => {
@@ -81,21 +75,23 @@ const BookItem = ({
             )}
           </button>
         )}
-        <button
-          onClick={handleRemove}
-          className="p-2 rounded-full text-muted-light dark:text-muted-dark hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
-          title="Remove from list"
-        >
-          <svg
-            fill="currentColor"
-            height="20"
-            viewBox="0 0 256 256"
-            width="20"
-            xmlns="http://www.w3.org/2000/svg"
+        {activeTab !== "finished-reading" && (
+          <button
+            onClick={handleRemove}
+            className="p-2 rounded-full text-muted-light dark:text-muted-dark hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
+            title="Remove from list"
           >
-            <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
-          </svg>
-        </button>
+            <svg
+              fill="currentColor"
+              height="20"
+              viewBox="0 0 256 256"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
