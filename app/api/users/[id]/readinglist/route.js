@@ -1,4 +1,3 @@
-// app/api/users/[id]/readinglist/route.js
 import dbConnect from "@/lib/mongodb";
 import ReadingList from "@/models/ReadingList";
 import { NextResponse } from "next/server";
@@ -28,7 +27,7 @@ export async function GET(request, { params }) {
 
     // Find or create reading list for the target user
     let readingList = await ReadingList.findOne({ userId: targetUserId })
-      .populate("books.bookId", "title author coverImage description genres")
+      .populate("books.bookId", "title author coverImageUrl summary genres")
       .sort({ "books.addedAt": -1 });
 
     // If no reading list exists, create an empty one
@@ -47,13 +46,13 @@ export async function GET(request, { params }) {
     };
 
     readingList.books.forEach((book) => {
-      if (booksByStatus[book.status]) {
+      if (booksByStatus[book.status] && book.bookId) {
         booksByStatus[book.status].push({
           id: book.bookId._id,
           title: book.bookId.title,
           author: book.bookId.author,
-          coverImage: book.bookId.coverImage,
-          description: book.bookId.description,
+          coverImage: book.bookId.coverImageUrl || "/default-book-cover.jpg",
+          description: book.bookId.summary,
           genres: book.bookId.genres,
           status: book.status,
           addedAt: book.addedAt,

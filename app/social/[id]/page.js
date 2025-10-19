@@ -18,7 +18,7 @@ const Page = () => {
     }
     return null;
   };
-
+  
   // Fetch user data
   const fetchUserData = async () => {
     const currentUserId = getCurrentUserId();

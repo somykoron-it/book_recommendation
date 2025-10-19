@@ -27,7 +27,6 @@ import StarRating from "./StarRating";
 const BookDetails = ({ book }) => {
   const router = useRouter();
   const [isInReadingList, setIsInReadingList] = useState(false);
-  console.log("isInReadingList", isInReadingList);
   const [readingListAnimating, setReadingListAnimating] = useState(false);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
