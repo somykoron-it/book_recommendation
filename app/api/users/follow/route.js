@@ -3,24 +3,23 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 
-// Simple authentication helper (replace with your actual auth method)
+// Enhanced authentication helper
 function getCurrentUser(request) {
-  // Option 1: Get user from headers (if using token-based auth)
   const userId = request.headers.get("x-user-id");
-  const userEmail = request.headers.get("x-user-email");
 
-  // Option 2: Get from cookies (if using session cookies)
-  // const cookieHeader = request.headers.get('cookie');
-  // Parse cookies and extract user info
-
-  if (!userId) {
+  // Add some basic validation
+  if (!userId || userId === "undefined" || userId === "null") {
     return null;
   }
 
   return {
     id: userId,
-    email: userEmail,
   };
+}
+
+// Validate MongoDB ObjectId
+function isValidObjectId(id) {
+  return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
 export async function POST(request) {
@@ -45,6 +44,14 @@ export async function POST(request) {
       );
     }
 
+    // Validate ObjectId format
+    if (!isValidObjectId(targetUserId)) {
+      return NextResponse.json(
+        { message: "Invalid user ID format" },
+        { status: 400 }
+      );
+    }
+
     // Prevent users from following themselves
     if (currentUser.id === targetUserId) {
       return NextResponse.json(
@@ -53,34 +60,61 @@ export async function POST(request) {
       );
     }
 
-    const currentUserDoc = await User.findById(currentUser.id);
-    const targetUser = await User.findById(targetUserId);
+    // Verify current user exists
+    const currentUserExists = await User.findById(currentUser.id);
+    if (!currentUserExists) {
+      return NextResponse.json(
+        { message: "Your account not found" },
+        { status: 404 }
+      );
+    }
 
+    const targetUser = await User.findById(targetUserId);
     if (!targetUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Check if already following
-    if (currentUserDoc.following.includes(targetUserId)) {
+    // Check if already following using MongoDB query for better performance
+    const isAlreadyFollowing = await User.findOne({
+      _id: currentUser.id,
+      following: targetUserId,
+    });
+
+    if (isAlreadyFollowing) {
       return NextResponse.json(
         { message: "You are already following this user" },
         { status: 400 }
       );
     }
 
-    // Add to following list of current user
-    currentUserDoc.following.push(targetUserId);
+    // Use atomic operations to update both users
+    await Promise.all([
+      // Add to current user's following
+      User.findByIdAndUpdate(currentUser.id, {
+        $addToSet: { following: targetUserId },
+      }),
+      // Add to target user's followers
+      User.findByIdAndUpdate(targetUserId, {
+        $addToSet: { followers: currentUser.id },
+      }),
+    ]);
 
-    // Add to followers list of target user
-    targetUser.followers.push(currentUser.id);
-
-    await Promise.all([currentUserDoc.save(), targetUser.save()]);
+    // Get updated counts
+    const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
+      User.findById(currentUser.id),
+      User.findById(targetUserId),
+    ]);
 
     return NextResponse.json(
       {
         message: "Successfully followed user",
-        followingCount: currentUserDoc.following.length,
-        followerCount: targetUser.followers.length,
+        followingCount: updatedCurrentUser.following.length,
+        followerCount: updatedTargetUser.followers.length,
+        targetUser: {
+          id: targetUser._id,
+          username: targetUser.username,
+          avatar: targetUser.avatar,
+        },
       },
       { status: 200 }
     );
@@ -116,38 +150,61 @@ export async function DELETE(request) {
       );
     }
 
-    const currentUserDoc = await User.findById(currentUser.id);
-    const targetUser = await User.findById(targetUserId);
+    // Validate ObjectId format
+    if (!isValidObjectId(targetUserId)) {
+      return NextResponse.json(
+        { message: "Invalid user ID format" },
+        { status: 400 }
+      );
+    }
 
-    if (!targetUser) {
+    // Verify users exist
+    const [currentUserDoc, targetUser] = await Promise.all([
+      User.findById(currentUser.id),
+      User.findById(targetUserId),
+    ]);
+
+    if (!currentUserDoc || !targetUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Check if actually following
-    if (!currentUserDoc.following.includes(targetUserId)) {
+    const isFollowing = currentUserDoc.following.includes(targetUserId);
+    if (!isFollowing) {
       return NextResponse.json(
         { message: "You are not following this user" },
         { status: 400 }
       );
     }
 
-    // Remove from following list
-    currentUserDoc.following = currentUserDoc.following.filter(
-      (id) => id.toString() !== targetUserId
-    );
+    // Use atomic operations to update both users
+    await Promise.all([
+      // Remove from current user's following
+      User.findByIdAndUpdate(currentUser.id, {
+        $pull: { following: targetUserId },
+      }),
+      // Remove from target user's followers
+      User.findByIdAndUpdate(targetUserId, {
+        $pull: { followers: currentUser.id },
+      }),
+    ]);
 
-    // Remove from followers list
-    targetUser.followers = targetUser.followers.filter(
-      (id) => id.toString() !== currentUser.id
-    );
-
-    await Promise.all([currentUserDoc.save(), targetUser.save()]);
+    // Get updated counts
+    const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
+      User.findById(currentUser.id),
+      User.findById(targetUserId),
+    ]);
 
     return NextResponse.json(
       {
         message: "Successfully unfollowed user",
-        followingCount: currentUserDoc.following.length,
-        followerCount: targetUser.followers.length,
+        followingCount: updatedCurrentUser.following.length,
+        followerCount: updatedTargetUser.followers.length,
+        targetUser: {
+          id: targetUser._id,
+          username: targetUser.username,
+          avatar: targetUser.avatar,
+        },
       },
       { status: 200 }
     );

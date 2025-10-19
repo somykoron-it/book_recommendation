@@ -15,7 +15,6 @@ import { toast } from "react-toastify";
 
 const UsersBooks = () => {
   const [readingList, setReadingList] = useState(null);
-  console.log("readingList", readingList)
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("want-to-read");
   const [currentPage, setCurrentPage] = useState(1);

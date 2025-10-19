@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MdOutlineBookmarkAdd, MdBookmark } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
-
 // Shadcn Dialog Components
 import {
   Dialog,
@@ -60,15 +59,31 @@ const BookDetails = ({ book }) => {
       if (!res.ok) throw new Error("Failed to fetch reading lists");
 
       const data = await res.json();
-      const bookInList = data.readingLists.find((list) =>
-        list.books.some((bookItem) => bookItem._id === book._id)
-      );
 
-      if (bookInList) {
-        setIsInReadingList(true);
+      // Check if readingList exists and has books
+      if (!data.readingList || !Array.isArray(data.readingList.books)) {
+        console.log("No reading list or books found");
+        setIsInReadingList(false);
+        return;
       }
+
+      // Convert current book ID to string for consistent comparison
+      const currentBookId = book._id.toString();
+
+      // Check if any book in the reading list matches our book ID
+      const bookInList = data.readingList.books.some((bookItem) => {
+        // Safely get the book ID from reading list item
+        const readingListBookId = bookItem.bookId?._id?.toString();
+
+        // If we have a valid ID, compare it
+        return readingListBookId && readingListBookId === currentBookId;
+      });
+
+      console.log("Book found in reading list:", bookInList);
+      setIsInReadingList(bookInList);
     } catch (error) {
       console.error("Failed to check reading list status:", error);
+      setIsInReadingList(false);
     } finally {
       setLoading(false);
     }

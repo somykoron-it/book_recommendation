@@ -1,5 +1,11 @@
+import SocialPage from "@/components/Social/SocialPage";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <>
+      <SocialPage />
+    </>
+  );
 };
 
 export default page;
