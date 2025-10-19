@@ -15,7 +15,7 @@ const ProfileInfo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState("");
 
-  // ✅ Access localStorage only on the client
+  // Access localStorage only on the client
   useEffect(() => {
     const storedUserId = localStorage.getItem("UserId");
     const storedUser = localStorage.getItem("user");
@@ -178,7 +178,7 @@ const ProfileInfo = () => {
           ></div>
           <Label
             htmlFor="profile_picture"
-            className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 transition-all duration-200"
+            className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 transition-all duration-200"
           >
             <span className="material-symbols-outlined text-sm">edit</span>
             <Input
@@ -240,29 +240,6 @@ const ProfileInfo = () => {
           </div>
         </div>
 
-        {/* Current Values Display */}
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-            Current Values from localStorage:
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500 dark:text-gray-400">
-                Username:{" "}
-              </span>
-              <span className="text-gray-900 dark:text-white">
-                {userName || "Not set"}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500 dark:text-gray-400">Email: </span>
-              <span className="text-gray-900 dark:text-white">
-                {email || "Not set"}
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div className="flex justify-end gap-4">
           <Button
             type="button"
@@ -276,7 +253,7 @@ const ProfileInfo = () => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Updating..." : "Update Profile"}
           </Button>

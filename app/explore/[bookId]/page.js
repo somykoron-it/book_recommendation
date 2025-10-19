@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import NewBookCard from "@/app/components/Book/NewBookCard";
-import BookDetails from "@/app/components/Book/BookDetails";
+import BookDetails from "@/components/Book/BookDetails";
+import NewBookCard from "@/components/Book/NewBookCard";
+
 
 const BookDetailPage = () => {
   const { bookId } = useParams();
