@@ -1,4 +1,3 @@
-
 import users from "./MocUser";
 import UserCard from "./UserCard";
 

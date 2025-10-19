@@ -1,33 +1,48 @@
-// import { useRouter } from "next/navigation";
+const UserCard = ({ user, onFollowToggle }) => {
+  // Safe destructuring with default values
+  const {
+    id = "",
+    username = "Unknown User",
+    avatar = "/images/default-avatar.png",
+    followerCount = 0,
+    isFollowing = false,
+  } = user || {};
 
-const UserCard = ({ name, description, avatar, isFollowing }) => {
-//   const router = useRouter();
+  // Don't render if no user data
+  if (!user) {
+    return null;
+  }
 
-//   const handleClick = () => {
-//     router.push(`/social/${encodeURIComponent(name)}`);
-//   };
+  const handleButtonClick = (e) => {
+    e.stopPropagation();
+    if (id && onFollowToggle) {
+      onFollowToggle(id, isFollowing);
+    }
+  };
 
   return (
-    <div
-      className="flex items-center justify-between rounded-lg bg-background-light p-4 shadow-sm dark:bg-background-dark cursor-pointer hover:bg-background-light/80 dark:hover:bg-background-dark/80"
-    //   onClick={handleClick}
-    >
+    <div className="flex items-center justify-between rounded-lg bg-background-light p-4 shadow-sm dark:bg-background-dark cursor-pointer hover:bg-background-light/80 dark:hover:bg-background-dark/80">
       <div className="flex items-center gap-4">
         <div
-          className="h-14 w-14 flex-shrink-0 rounded-full bg-cover bg-center"
-          style={{ backgroundImage: `url("${avatar}")` }}
+          className="h-14 w-14 flex-shrink-0 rounded-full bg-cover bg-center border border-primary/20"
+          style={{
+            backgroundImage: `url("${avatar}")`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         ></div>
         <div>
           <p className="font-semibold text-background-dark dark:text-background-light">
-            {name}
+            {username}
           </p>
           <p className="text-sm text-background-dark/70 dark:text-background-light/70">
-            {description}
+            {followerCount} {followerCount === 1 ? "follower" : "followers"}
           </p>
         </div>
       </div>
       <button
-        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+        onClick={handleButtonClick}
+        className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
           isFollowing
             ? "bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
             : "bg-primary text-white hover:bg-primary/90"

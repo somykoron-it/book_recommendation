@@ -80,7 +80,7 @@ export default function RegisterForm() {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success("Registration successful! Redirecting to login...");
+        toast.success("Registration successful!");
         router.push("/login?registered=true");
       } else {
         setError(result.message || "Registration failed. Please try again.");

@@ -1,10 +1,9 @@
-
-import SocialPageCombine from "@/components/Social/SocialPageCombine";
+import SocialPage from "@/components/Social/SocialPage";
 
 const page = () => {
   return (
     <>
-      <SocialPageCombine />
+      <SocialPage />
     </>
   );
 };

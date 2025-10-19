@@ -1,14 +1,113 @@
-import { useState } from "react";
-import users from "./MocUser";
-import UserCard from "./UserCard";
+"use client";
+import { useState, useEffect } from "react";
 
+import UserCard from "./UserCard";
+import Following from "./Following";
+import Followers from "./Followers";
 
 const SocialPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Get current user ID from your auth context or localStorage
+  const getCurrentUserId = () => {
+    // TODO: Replace this with your actual auth context or token
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("UserId") || "current-user-id";
+    }
+    return "current-user-id";
+  };
+
+  // Search users with debounce
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const currentUserId = getCurrentUserId();
+
+        const response = await fetch(
+          `/api/users/search?q=${encodeURIComponent(
+            searchQuery
+          )}&page=1&limit=20`,
+          {
+            headers: {
+              "x-user-id": currentUserId,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to search users");
+        }
+
+        const data = await response.json();
+        console.log("Search results:", data); // Debug log
+        setSearchResults(data.users || []);
+      } catch (err) {
+        setError("Failed to search users");
+        console.error("Search error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchUsers, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const handleFollowToggle = async (targetUserId, currentIsFollowing) => {
+    try {
+      const currentUserId = getCurrentUserId();
+
+      const url = currentIsFollowing
+        ? `/api/users/follow?targetUserId=${targetUserId}`
+        : "/api/users/follow";
+
+      const options = {
+        method: currentIsFollowing ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUserId,
+        },
+        ...(currentIsFollowing
+          ? {}
+          : { body: JSON.stringify({ targetUserId }) }),
+      };
+
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error("Failed to update follow status");
+      }
+
+      const result = await response.json();
+
+      // Update local state
+      setSearchResults((prev) =>
+        prev.map((user) =>
+          user && user.id === targetUserId
+            ? {
+                ...user,
+                isFollowing: !currentIsFollowing,
+                followerCount: result.followerCount,
+              }
+            : user
+        )
+      );
+    } catch (err) {
+      console.error("Follow toggle error:", err);
+      setError("Failed to update follow status");
+    }
+  };
 
   return (
     <main className="flex-1 px-10 py-8">
@@ -37,29 +136,50 @@ const SocialPage = () => {
             />
           </div>
         </div>
-        <div className="space-y-12">
-          <div>
-            <h2 className="mb-4 text-2xl font-bold text-background-dark dark:text-background-light">
-              Search Results
-            </h2>
-            <div className="space-y-4">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <UserCard
-                    key={user.name}
-                    name={user.name}
-                    description={user.description}
-                    avatar={user.avatar}
-                    isFollowing={user.isFollowing}
-                  />
-                ))
-              ) : (
-                <p className="text-background-dark/70 dark:text-background-light/70">
-                  No users found
-                </p>
-              )}
-            </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-100 p-4 text-red-700 dark:bg-red-900 dark:text-red-200">
+            {error}
           </div>
+        )}
+
+        <div className="space-y-12">
+          {searchQuery ? (
+            <div>
+              <h2 className="mb-4 text-2xl font-bold text-background-dark dark:text-background-light">
+                Search Results
+                {searchResults.length > 0 && ` (${searchResults.length})`}
+              </h2>
+              <div className="space-y-4">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  searchResults
+                    .filter((user) => user) // Filter out any undefined users
+                    .map((user) => (
+                      <UserCard
+                        key={user.id}
+                        user={user}
+                        onFollowToggle={handleFollowToggle}
+                      />
+                    ))
+                ) : (
+                  <p className="text-center text-background-dark/70 dark:text-background-light/70 py-8">
+                    {searchQuery.trim()
+                      ? "No users found"
+                      : "Start typing to search users"}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <Following />
+              <Followers />
+            </>
+          )}
         </div>
       </div>
     </main>
