@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context.js/AuthContext";
 
 // Define form schema
 const formSchema = z.object({
@@ -33,6 +34,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { setAuth } = useAuth();
 
   const {
     register,
@@ -54,32 +56,24 @@ export default function LoginForm() {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       const result = await response.json();
-      console.log("User", result)
+
       if (response.ok) {
         toast.success("Login successful!");
-        localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("UserId", result.user._id);
-        localStorage.setItem("user", result.user.username);
-        localStorage.setItem("userEmail", result.user.email);
+        setAuth(result.user);
         router.push("/explore");
       } else {
-        setError(
-          result.message || "Login failed. Please check your credentials."
-        );
-        toast.error(
-          result.message || "Login failed. Please check your credentials."
-        );
+        setError(result.message || "Login failed");
+        toast.error(result.message || "Login failed");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again later.");
+      setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

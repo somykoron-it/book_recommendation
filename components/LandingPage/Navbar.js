@@ -10,16 +10,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "../context.js/AuthContext";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, logout, user } = useAuth();
+  console.log("User", user)
   const pathname = usePathname();
-
-  useEffect(() => {
-    // Check if user is logged in on client side
-    const loggedIn = localStorage.getItem("isLoggedIn") ? true : false;
-    setIsLoggedIn(loggedIn);
-  }, []);
 
   const navItems = [
     { label: "Explore", href: "/explore" },
@@ -27,12 +23,23 @@ const Navbar = () => {
     { label: "Social", href: "/social" },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userEmail");
-    setIsLoggedIn(false);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      // Call the logout API to clear cookie
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // ensure cookie is sent
+      });
+
+      if (res.ok) {
+        logout(); // Clear from React context
+        window.location.href = "/"; // Redirect to home
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const isActive = (href) => {
