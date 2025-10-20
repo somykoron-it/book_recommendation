@@ -56,7 +56,7 @@ const NotificationPage = () => {
   }
 
   return (
-    <main className="flex-1 px-10 py-8 bg-gray-50 dark:bg-gray-900">
+    <main className="flex-1 px-10 py-8 bg-gray-50 dark:bg-gray-900 min-h-[90dvh]">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
