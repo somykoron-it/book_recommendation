@@ -1,6 +1,7 @@
 // app/api/users/follow/route.js
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import Notification from "@/models/Notification";
 import { NextResponse } from "next/server";
 
 // Enhanced authentication helper
@@ -99,6 +100,13 @@ export async function POST(request) {
       }),
     ]);
 
+    // ADD THIS: Create follow notification
+    await Notification.create({
+      recipient: targetUserId, // The user being followed gets notified
+      sender: currentUser.id,
+      type: "follow",
+    });
+
     // Get updated counts
     const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
       User.findById(currentUser.id),
@@ -188,6 +196,13 @@ export async function DELETE(request) {
         $pull: { followers: currentUser.id },
       }),
     ]);
+
+    // ADD THIS: Create unfollow notification
+    await Notification.create({
+      recipient: targetUserId, // The user being unfollowed gets notified
+      sender: currentUser.id,
+      type: "unfollow",
+    });
 
     // Get updated counts
     const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
