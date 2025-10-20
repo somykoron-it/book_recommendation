@@ -2,23 +2,33 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthContext";
 
 const PublicRoute = ({ children }) => {
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    // Wait for auth state to load
+    if (isLoggedIn === null) return; // still loading
 
-    if (isLoggedIn === "true") {
-      // Redirect logged-in users to /home
+    if (isLoggedIn) {
+      // Redirect logged-in users to /explore
       router.replace("/explore");
     } else {
-      setChecking(false); // Allow rendering for public
+      setChecking(false); // Allow rendering for public users
     }
-  }, [router]);
+  }, [isLoggedIn, router]);
 
-  if (checking) return null; // Or a loading spinner
+  if (checking || isLoggedIn === null) {
+    // Show loader while checking auth
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   return children;
 };

@@ -1,21 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthContext";
 
 const PrivateRoute = ({ children }) => {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn === "true") {
-      setAuthorized(true);
-    } else {
+    // Wait for AuthProvider to fetch user
+    if (isLoggedIn === null) return; // still loading
+    if (!isLoggedIn) {
       router.replace("/"); // redirect to login/home
+    } else {
+      setLoading(false); // user is logged in
     }
-  }, [router]);
+  }, [isLoggedIn, router]);
 
-  if (!authorized) return null; // or loading spinner
+  if (loading || isLoggedIn === null) {
+    // show a loader while checking auth
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   return children;
 };
