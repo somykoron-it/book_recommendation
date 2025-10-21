@@ -7,7 +7,12 @@ export async function PUT(request) {
   await dbConnect();
 
   try {
-    const { userId, username, email, avatar } = await request.json();
+    const formData = await request.formData();
+
+    const userId = formData.get("userId");
+    const username = formData.get("username");
+    const email = formData.get("email");
+    const avatarFile = formData.get("avatar");
 
     if (!userId) {
       return NextResponse.json(
@@ -20,6 +25,35 @@ export async function PUT(request) {
     const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    // Handle avatar file upload if provided
+    let avatarBase64 = user.avatar;
+    if (avatarFile && avatarFile.size > 0) {
+      // Validate file type
+      if (!avatarFile.type.startsWith("image/")) {
+        return NextResponse.json(
+          { message: "Please upload an image file" },
+          { status: 400 }
+        );
+      }
+
+      // Validate file size (max 2MB)
+      if (avatarFile.size > 2 * 1024 * 1024) {
+        return NextResponse.json(
+          { message: "Image size must be less than 2MB" },
+          { status: 400 }
+        );
+      }
+
+      // Convert file to base64
+      const bytes = await avatarFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString("base64");
+      const mimeType = avatarFile.type;
+
+      // Create data URL
+      avatarBase64 = `data:${mimeType};base64,${base64}`;
     }
 
     // Check if username is taken by another user
@@ -52,9 +86,9 @@ export async function PUT(request) {
       user.email = email;
     }
 
-    // Update avatar if provided
-    if (avatar) {
-      user.avatar = avatar;
+    // Update avatar if new one was uploaded
+    if (avatarFile && avatarFile.size > 0) {
+      user.avatar = avatarBase64;
     }
 
     await user.save();

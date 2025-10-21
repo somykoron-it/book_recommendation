@@ -56,8 +56,8 @@ const NotificationPage = () => {
   }
 
   return (
-    <main className="flex-1 px-10 py-8 bg-gray-50 dark:bg-gray-900 min-h-[90dvh]">
-      <div className="mx-auto max-w-4xl">
+    <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[90dvh]">
+      <div className="">
         {/* Header */}
         <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -66,13 +66,13 @@ const NotificationPage = () => {
           <div className="flex gap-2">
             <button
               onClick={handleMarkAllAsRead}
-              className="rounded-lg bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-500/20 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors"
+              className="rounded-lg bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-500/20 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors cursor-pointer"
             >
               Mark all as read
             </button>
             <button
               onClick={handleClearAll}
-              className="rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 transition-colors"
+              className="rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 transition-colors cursor-pointer"
             >
               Clear all
             </button>
@@ -89,7 +89,7 @@ const NotificationPage = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 transition-all hover:shadow-md"
+                className="flex items-center justify-between rounded-lg bg-background-light  p-4 shadow-sm dark:bg-gray-800 transition-all hover:shadow-md cursor-pointer hover:bg-background-light/80"
               >
                 {/* Left: Avatar + Content */}
                 <div className="flex items-center gap-4">
