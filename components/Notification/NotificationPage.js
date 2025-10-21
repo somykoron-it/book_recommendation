@@ -56,7 +56,7 @@ const NotificationPage = () => {
   }
 
   return (
-    <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-gray-50 dark:bg-gray-900 min-h-[90dvh]">
+    <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[90dvh]">
       <div className="">
         {/* Header */}
         <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
@@ -89,7 +89,7 @@ const NotificationPage = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 transition-all hover:shadow-md"
+                className="flex items-center justify-between rounded-lg bg-background-light  p-4 shadow-sm dark:bg-gray-800 transition-all hover:shadow-md cursor-pointer hover:bg-background-light/80"
               >
                 {/* Left: Avatar + Content */}
                 <div className="flex items-center gap-4">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
+import { Pencil } from "lucide-react";
 
 const ProfileInfo = () => {
   const [userName, setUserName] = useState("");
@@ -203,13 +204,18 @@ const ProfileInfo = () => {
               src={getAvatarUrl()}
               alt="Profile Avatar"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                // 👇 fallback if the image fails to load
+                e.currentTarget.src =
+                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+              }}
             />
           </div>
           <Label
             htmlFor="profile_picture"
             className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 transition-all duration-200"
           >
-            <span className="material-symbols-outlined text-sm">edit</span>
+            <Pencil className="w-4 h-4" />
             <Input
               className="hidden"
               id="profile_picture"

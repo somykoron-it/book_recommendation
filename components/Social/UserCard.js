@@ -13,7 +13,7 @@ const UserCard = ({ user, onFollowToggle, isFollowers = false }) => {
     followerCount = 0,
     isFollowing = false,
   } = user || {};
-
+  
   // Don't render if no user data
   if (!user) {
     return null;
