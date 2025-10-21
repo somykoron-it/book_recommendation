@@ -12,6 +12,7 @@ const ProfileInfo = () => {
   const [avatar, setAvatar] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState("");
 
@@ -65,7 +66,7 @@ const ProfileInfo = () => {
     fetchUser();
   }, []);
 
-  // Handle profile update
+  // Handle profile update with image upload
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -79,25 +80,36 @@ const ProfileInfo = () => {
         return;
       }
 
-      const updateData = { userId: storedUserId };
-      if (newUsername && newUsername !== userName)
-        updateData.username = newUsername;
-      if (newEmail && newEmail !== email) updateData.email = newEmail;
-      if (avatar && !avatar.startsWith("blob:")) updateData.avatar = avatar;
+      // Check if there are any changes
+      const hasUsernameChanges = newUsername && newUsername !== userName;
+      const hasEmailChanges = newEmail && newEmail !== email;
+      const hasAvatarChanges = avatarFile !== null;
 
-      // Check if there are any changes besides userId
-      const hasChanges = Object.keys(updateData).length > 1;
-
-      if (!hasChanges) {
+      if (!hasUsernameChanges && !hasEmailChanges && !hasAvatarChanges) {
         toast.error("No changes detected");
         setIsLoading(false);
         return;
       }
 
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("userId", storedUserId);
+
+      if (hasUsernameChanges) {
+        formData.append("username", newUsername);
+      }
+
+      if (hasEmailChanges) {
+        formData.append("email", newEmail);
+      }
+
+      if (hasAvatarChanges) {
+        formData.append("avatar", avatarFile);
+      }
+
       const res = await fetch("/api/auth/user/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
+        body: formData, // Remove Content-Type header for FormData
       });
 
       const result = await res.json();
@@ -106,31 +118,20 @@ const ProfileInfo = () => {
         toast.success(result.message || "Profile updated successfully");
 
         // Update local and state data
-        if (updateData.username) {
-          setUserName(updateData.username);
-          localStorage.setItem("user", updateData.username);
-          setNewUsername("");
-        }
-        if (updateData.email) {
-          setEmail(updateData.email);
-          localStorage.setItem("userEmail", updateData.email);
-          setNewEmail("");
-        }
-        if (updateData.avatar) {
-          setAvatar(updateData.avatar);
-          localStorage.setItem("userAvatar", updateData.avatar);
-        }
-
-        // Update with the full user object from response if available
         if (result.user) {
           setUserName(result.user.username || "");
           setEmail(result.user.email || "");
           setAvatar(result.user.avatar || "");
+          setAvatarFile(null); // Clear the file after successful upload
 
           localStorage.setItem("user", result.user.username || "");
           localStorage.setItem("userEmail", result.user.email || "");
           localStorage.setItem("userAvatar", result.user.avatar || "");
         }
+
+        // Clear form fields
+        setNewUsername("");
+        setNewEmail("");
       } else {
         toast.error(result.message || "Failed to update profile");
       }
@@ -142,13 +143,28 @@ const ProfileInfo = () => {
     }
   };
 
-  // Handle avatar preview (temporary only)
+  // Handle avatar file selection and preview
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file (JPEG, PNG, GIF, etc.)");
+        return;
+      }
+
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB");
+        return;
+      }
+
+      // Create preview
       const previewUrl = URL.createObjectURL(file);
       setAvatar(previewUrl);
-      toast.info("Avatar preview added. Upload feature coming soon!");
+      setAvatarFile(file);
+
+      toast.info("Avatar selected. Click 'Update Profile' to save changes.");
     }
   };
 
@@ -156,6 +172,21 @@ const ProfileInfo = () => {
   const clearFormFields = () => {
     setNewUsername("");
     setNewEmail("");
+    setAvatarFile(null);
+
+    // Reset avatar preview to current avatar
+    const currentAvatar = localStorage.getItem("userAvatar");
+    if (currentAvatar) {
+      setAvatar(currentAvatar);
+    }
+  };
+
+  // Get avatar URL for display
+  const getAvatarUrl = () => {
+    if (avatar) {
+      return avatar;
+    }
+    return "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
   };
 
   return (
@@ -167,15 +198,13 @@ const ProfileInfo = () => {
       {/* Avatar Section */}
       <div className="flex items-center gap-6 mb-6">
         <div className="relative">
-          <div
-            className="w-24 h-24 rounded-full bg-cover bg-center border-2 border-gray-300 dark:border-gray-600"
-            style={{
-              backgroundImage: `url('${
-                avatar ||
-                "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-              }')`,
-            }}
-          ></div>
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+            <img
+              src={getAvatarUrl()}
+              alt="Profile Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
           <Label
             htmlFor="profile_picture"
             className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 transition-all duration-200"
@@ -187,6 +216,7 @@ const ProfileInfo = () => {
               type="file"
               accept="image/*"
               onChange={handleAvatarChange}
+              disabled={isLoading}
             />
           </Label>
         </div>
@@ -208,6 +238,13 @@ const ProfileInfo = () => {
               {email || "Not set"}
             </p>
           </div>
+          {avatarFile && (
+            <div className="mt-2">
+              <p className="text-xs text-green-600 dark:text-green-400">
+                ✓ New avatar selected (click Update Profile to save)
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -224,6 +261,7 @@ const ProfileInfo = () => {
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               className="w-full"
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -236,6 +274,7 @@ const ProfileInfo = () => {
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               className="w-full"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -252,7 +291,7 @@ const ProfileInfo = () => {
           </Button>
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || (!newUsername && !newEmail && !avatarFile)}
             className="bg-primary text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Updating..." : "Update Profile"}

@@ -110,8 +110,8 @@ const SocialPage = () => {
   };
 
   return (
-    <main className="flex-1 px-10 py-8">
-      <div className="mx-auto max-w-4xl">
+    <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="">
         <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-3xl font-bold text-background-dark dark:text-background-light">
             Social Connections
