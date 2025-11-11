@@ -1,3 +1,4 @@
+// app/api/books/[bookId]/reviews/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Review from "@/models/Review";
