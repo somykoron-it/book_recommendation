@@ -14,13 +14,14 @@ import { useAuth } from "../context.js/AuthContext";
 
 const Navbar = () => {
   const { isLoggedIn, logout, user } = useAuth();
-  console.log("User", user)
+  console.log("User", user);
   const pathname = usePathname();
 
   const navItems = [
     { label: "Explore", href: "/explore" },
     { label: "My Books", href: "/my-books" },
     { label: "Social", href: "/social" },
+    { label: "Recommendation", href: "/recommendation" },
   ];
 
   const handleLogout = async () => {
@@ -122,9 +123,9 @@ const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
+                      {/* <Link href="/profile" className="cursor-pointer">
                         Profile
-                      </Link>
+                      </Link> */}
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/settings" className="cursor-pointer">
@@ -216,7 +217,7 @@ const Navbar = () => {
                           >
                             Notifications
                           </Link>
-                          <Link
+                          {/* <Link
                             href="/profile"
                             className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
                               isActive("/profile")
@@ -225,7 +226,7 @@ const Navbar = () => {
                             }`}
                           >
                             Profile
-                          </Link>
+                          </Link> */}
                           <Link
                             href="/settings"
                             className={`text-lg font-medium py-3 px-4 rounded-lg transition-colors ${

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import BookDetails from "@/components/Book/BookDetails";
 import NewBookCard from "@/components/Book/NewBookCard";
-
+import BookReviews from "@/components/Book/BookReviews"; // Add this import
 
 const BookDetailPage = () => {
   const { bookId } = useParams();
@@ -117,6 +117,9 @@ const BookDetailPage = () => {
               </div>
             </div>
           )}
+
+          {/* Reviews Component - Add this section */}
+          <BookReviews bookId={bookId} />
         </div>
       </main>
     </div>

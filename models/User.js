@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     minlength: [3, "Username must be at least 3 characters long"],
   },
-  
+
   email: {
     type: String,
     required: [true, "Please provide an email"],
@@ -61,14 +61,12 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Virtual for follower count
 UserSchema.virtual("followerCount").get(function () {
-  return this.followers.length;
+  return this.followers ? this.followers.length : 0;
 });
 
-// Virtual for following count
 UserSchema.virtual("followingCount").get(function () {
-  return this.following.length;
+  return this.following ? this.following.length : 0;
 });
 
 // Ensure virtual fields are serialized
