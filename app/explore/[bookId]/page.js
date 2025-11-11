@@ -95,7 +95,8 @@ const BookDetailPage = () => {
           </nav>
 
           {/* Book Details Component */}
-          <BookDetails book={book} />
+          
+          <BookDetails book={book} /> 
 
           {/* Similar Books Section */}
           {similarBooks.length > 0 && (

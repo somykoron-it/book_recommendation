@@ -1,10 +1,10 @@
 import PrivateRoute from "@/components/context.js/PrivateRoute";
-import SocialPage from "@/components/Social/SocialPage";
+import Recommendation from "@/components/Recommendation/Recommendation";
 
 const page = () => {
   return (
     <PrivateRoute>
-      <SocialPage />
+      <Recommendation />
     </PrivateRoute>
   );
 };

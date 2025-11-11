@@ -9,13 +9,11 @@ export async function POST(request, { params }) {
     await dbConnect();
 
     // Get the bookId from params
-    const { bookId } = params;
-
+    const { bookId } = await params;
 
     // Parse request body
     const body = await request.json();
     const { userId, rating, reviewText } = body;
-
 
     // Validate required fields
     if (!userId) {
@@ -138,12 +136,13 @@ export async function POST(request, { params }) {
 // Helper function to update book rating
 async function updateBookRating(bookId) {
   try {
-    const reviews = await Review.find({ bookId });
-    const totalReviews = reviews.length;
+    const reviews = (await Review.find({ bookId })) || [];
+
+    const totalReviews = Array.isArray(reviews) ? reviews.length : 0;
 
     if (totalReviews > 0) {
       const totalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
+        (sum, review) => sum + (review.rating || 0),
         0
       );
       const averageRating = totalRating / totalReviews;
@@ -151,6 +150,11 @@ async function updateBookRating(bookId) {
       await Book.findByIdAndUpdate(bookId, {
         averageRating: Math.round(averageRating * 10) / 10,
         reviewCount: totalReviews,
+      });
+    } else {
+      await Book.findByIdAndUpdate(bookId, {
+        averageRating: 0,
+        reviewCount: 0,
       });
     }
   } catch (error) {
