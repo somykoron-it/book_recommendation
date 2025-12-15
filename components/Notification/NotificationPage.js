@@ -65,12 +65,6 @@ const NotificationPage = () => {
           </h1>
           <div className="flex gap-2">
             <button
-              onClick={handleMarkAllAsRead}
-              className="rounded-lg bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-500/20 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors cursor-pointer"
-            >
-              Mark all as read
-            </button>
-            <button
               onClick={handleClearAll}
               className="rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 transition-colors cursor-pointer"
             >
