@@ -151,14 +151,14 @@ export default function LoginForm() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <Link
                   href="/forgot-password"
                   className="text-sm font-medium text-primary hover:text-primary/80"
                 >
                   Forgot Password?
                 </Link>
-              </div>
+              </div> */}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Log In"}

@@ -10,6 +10,8 @@ const SocialPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [followLoadingIds, setFollowLoadingIds] = useState(new Set());
+
 
   // Get current user ID from your auth context or localStorage
   const getCurrentUserId = () => {
@@ -65,6 +67,7 @@ const SocialPage = () => {
   }, [searchQuery]);
 
   const handleFollowToggle = async (targetUserId, currentIsFollowing) => {
+    setFollowLoadingIds((prev) => new Set(prev).add(targetUserId));
     try {
       const currentUserId = getCurrentUserId();
 
@@ -106,6 +109,13 @@ const SocialPage = () => {
     } catch (err) {
       console.error("Follow toggle error:", err);
       setError("Failed to update follow status");
+    } finally {
+      // Remove loading state
+      setFollowLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetUserId);
+        return next;
+      });
     }
   };
 
@@ -163,6 +173,7 @@ const SocialPage = () => {
                         key={user.id}
                         user={user}
                         onFollowToggle={handleFollowToggle}
+                        isLoading={followLoadingIds.has(user.id)}
                       />
                     ))
                 ) : (
