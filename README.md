@@ -16,83 +16,94 @@ BookWise is a full-stack Next.js application that allows users to discover books
    ```bash
    git clone https://github.com/somykoron-it/book_recommendation.git
    cd book_recommendation
-   (Replace your-username/BookWise with your actual repository URL)
    ```
 
-Install dependenciesBashnpm install
+2. **Install dependencies**
 
-# or
+   ```bash
 
-yarn install
+   npm install
 
-# or
+   yarn install
 
-pnpm install
+   pnpm install
 
-# or
+   ```
 
-bun install
+3. **Install dependencies**
 
-Set up environment variablesCreate a .env.local file in the root directory and add the required variables (example provided in .env.example):
-MONGODB_URI=
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
-JWT_SECRET=
+Set up environment variablesCreate a .env file in the root directory and add the required variables (example provided in .env):
 
-# Run Project
+    ```bash
 
-Start the development serverBashnpm run dev
+    MONGODB_URI=
 
-# or
+    NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
-yarn dev
+    JWT_SECRET=
 
-# or
+    ```
 
-pnpm dev
+3. **Run Project**
 
-# or
+    ```bash
 
-bun dev
+    npm run dev
 
-Open http://localhost:3000 in your browser.The app will automatically reload when you make changes to the code.
+    yarn dev
+
+    pnpm dev
+
+    ```
+
+
+### Open http://localhost:3000 in your browser.The app will automatically reload when you make changes to the code.
 
 ## Features
 
-# User Management
+### User Management
 
-Registration & Login – Secure user signup and login (supports email/password and OAuth providers like Google)
-Profile Update – Users can edit their profile, upload avatar, bio, favorite genres, and reading preferences
+- Registration & Login – Secure user signup and login (supports email/password and OAuth providers like Google)
 
-# Book Discovery
+- Profile Update – Users can edit their profile, upload avatar, bio, favorite genres, and reading preferences
 
-Search – Full-text search for books by title, author, ISBN, or keywords
-Filter & Browse – Filter by genre, publication year, language, popularity; browse trending, new releases, and genre-specific lists
+### Book Discovery
 
-# Recommendation Engine
+- Search – Full-text search for books by title, author, ISBN, or keywords
 
-Content-Based Filtering – Personalized book recommendations based on user's reading history, ratings, and favorite genres
+- Filter & Browse – Filter by genre, publication year, language, popularity; browse trending, new releases, and genre-specific lists
 
-# Community Feedback
+### Recommendation Engine
 
-Reviews and Ratings – Users can write detailed reviews and rate books on a 5-star scale
-Reviews are displayed on book pages with sorting options (most recent, most helpful)
+- Content-Based Filtering – Personalized book recommendations based on user's reading history, ratings, and favorite genres
 
-# Reading List Management
+### Community Feedback
 
-Want to Read, Currently Reading, Finished – Dedicated shelves for organizing personal reading progress
-Easy drag-and-drop or button-based updates between lists
+- Reviews and Ratings – Users can write detailed reviews and rate books on a 5-star scale
 
-# Social Features
+- Reviews are displayed on book pages with sorting options (most recent, most helpful)
 
-Follow Other Users – Build a network by following friends or interesting readers
-Activity Feed – See what your followed users are reading, rating, reviewing, or adding to their lists
+### Reading List Management
 
-# Notifications
+- Want to Read, Currently Reading, Finished – Dedicated shelves for organizing personal reading progress
 
-Real-time or email notifications for:
-Friend activities (new reviews, finished books, etc.)
-New personalized recommendations
-Follow requests and interactions
+- Easy drag-and-drop or button-based updates between lists
+
+### Social Features
+
+- Follow Other Users – Build a network by following friends or interesting readers
+
+- Activity Feed – See what your followed users are reading, rating, reviewing, or adding to their lists
+
+### Notifications
+
+- Real-time or email notifications for:
+
+- Friend activities (new reviews, finished books, etc.)
+
+- New personalized recommendations
+
+- Follow requests and interactions
 
 ## Live Demo
 
