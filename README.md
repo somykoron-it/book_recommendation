@@ -32,8 +32,6 @@ BookWise is a full-stack Next.js application that allows users to discover books
 
 3. **Install dependencies**
 
-Set up environment variablesCreate a .env file in the root directory and add the required variables (example provided in .env):
-
     ```bash
 
     MONGODB_URI=
